@@ -129,7 +129,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	var cpuOptions *ec2types.CpuOptionsRequest
 	if s.EnableNestedVirtualization {
 		cpuOptions = &ec2types.CpuOptionsRequest{
-			AmdSevSnp: ec2types.AmdSevSnpSpecificationEnabled,
+			NestedVirtualization: ec2types.NestedVirtualizationSpecificationEnabled,
 		}
 	}
 

@@ -126,10 +126,8 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 
 	var cpuOptions *ec2.CpuOptionsRequest
 	if s.EnableNestedVirtualization {
-		amdSevSnp := "enabled"
-		cpuOptions = &ec2.CpuOptionsRequest{
-			AmdSevSnp: &amdSevSnp,
-		}
+		log.Println("Warning: EnableNestedVirtualization is not supported with the legacy AWS SDK v1. " +
+			"Use the ebs, ebssurrogate, or ebsvolume builders which use the AWS SDK v2.")
 	}
 
 	az := state.Get("availability_zone").(string)

@@ -72,11 +72,10 @@ func TestCreateTemplateData(t *testing.T) {
 	template := stepRunSpotInstance.CreateTemplateData(aws.String("userdata"), "az", state,
 		&ec2.LaunchTemplateInstanceMarketOptionsRequest{})
 
-	if template.CpuOptions == nil || template.CpuOptions.AmdSevSnp == nil {
-		t.Fatalf("Template should contain cpu options when enable_nested_virtualization is configured")
-	}
-	if *template.CpuOptions.AmdSevSnp != "enabled" {
-		t.Fatalf("Template should have AmdSevSnp set to enabled, received %#v", template.CpuOptions)
+	// EnableNestedVirtualization is not supported with the legacy AWS SDK v1,
+	// so CpuOptions should not be set in this code path.
+	if template.CpuOptions != nil {
+		t.Fatalf("Template should not set CpuOptions with the legacy AWS SDK v1, received %#v", template.CpuOptions)
 	}
 
 	// expected := []*ec2.LaunchTemplateInstanceNetworkInterfaceSpecificationRequest{

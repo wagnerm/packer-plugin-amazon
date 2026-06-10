@@ -170,10 +170,8 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 	}
 
 	if s.EnableNestedVirtualization {
-		amdSevSnp := "enabled"
-		templateData.CpuOptions = &ec2.LaunchTemplateCpuOptionsRequest{
-			AmdSevSnp: &amdSevSnp,
-		}
+		log.Println("Warning: EnableNestedVirtualization is not supported with the legacy AWS SDK v1. " +
+			"Use the ebs, ebssurrogate, or ebsvolume builders which use the AWS SDK v2.")
 	}
 
 	if s.HttpEndpoint == "enabled" {

@@ -77,8 +77,8 @@ func TestCreateTemplateData(t *testing.T) {
 	if template.CpuOptions == nil {
 		t.Fatalf("Template should contain cpu options when enable_nested_virtualization is configured")
 	}
-	if template.CpuOptions.AmdSevSnp != ec2types.AmdSevSnpSpecificationEnabled {
-		t.Fatalf("Template should have AmdSevSnp set to enabled, received %#v", template.CpuOptions)
+	if template.CpuOptions.NestedVirtualization != ec2types.NestedVirtualizationSpecificationEnabled {
+		t.Fatalf("Template should have NestedVirtualization set to enabled, received %#v", template.CpuOptions)
 	}
 
 	// expected := []*ec2.LaunchTemplateInstanceNetworkInterfaceSpecificationRequest{

@@ -174,7 +174,7 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 
 	if s.EnableNestedVirtualization {
 		templateData.CpuOptions = &ec2types.LaunchTemplateCpuOptionsRequest{
-			AmdSevSnp: ec2types.AmdSevSnpSpecificationEnabled,
+			NestedVirtualization: ec2types.NestedVirtualizationSpecificationEnabled,
 		}
 	}
 
