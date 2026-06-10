@@ -68,8 +68,19 @@ func getBasicStep() *StepRunSpotInstance {
 func TestCreateTemplateData(t *testing.T) {
 	state := tStateSpot()
 	stepRunSpotInstance := getBasicStep()
+	stepRunSpotInstance.CPUOptions = CPUOptions{
+		CoreCount:      2,
+		ThreadsPerCore: 1,
+	}
 	template := stepRunSpotInstance.CreateTemplateData(aws.String("userdata"), "az", state,
 		&ec2.LaunchTemplateInstanceMarketOptionsRequest{})
+
+	if template.CpuOptions == nil || template.CpuOptions.CoreCount == nil || template.CpuOptions.ThreadsPerCore == nil {
+		t.Fatalf("Template should contain cpu options when cpu_options is configured")
+	}
+	if *template.CpuOptions.CoreCount != 2 || *template.CpuOptions.ThreadsPerCore != 1 {
+		t.Fatalf("Template should contain configured cpu options, received %#v", template.CpuOptions)
+	}
 
 	// expected := []*ec2.LaunchTemplateInstanceNetworkInterfaceSpecificationRequest{
 	// 	&ec2.LaunchTemplateInstanceNetworkInterfaceSpecificationRequest{

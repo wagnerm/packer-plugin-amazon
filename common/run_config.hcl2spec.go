@@ -37,6 +37,31 @@ func (*FlatAmiFilterOptions) HCL2Spec() map[string]hcldec.Spec {
 	return s
 }
 
+// FlatCPUOptions is an auto-generated flat version of CPUOptions.
+// Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
+type FlatCPUOptions struct {
+	CoreCount      *int32 `mapstructure:"core_count" required:"false" cty:"core_count" hcl:"core_count"`
+	ThreadsPerCore *int32 `mapstructure:"threads_per_core" required:"false" cty:"threads_per_core" hcl:"threads_per_core"`
+}
+
+// FlatMapstructure returns a new FlatCPUOptions.
+// FlatCPUOptions is an auto-generated flat version of CPUOptions.
+// Where the contents a fields with a `mapstructure:,squash` tag are bubbled up.
+func (*CPUOptions) FlatMapstructure() interface{ HCL2Spec() map[string]hcldec.Spec } {
+	return new(FlatCPUOptions)
+}
+
+// HCL2Spec returns the hcl spec of a CPUOptions.
+// This spec is used by HCL to read the fields of CPUOptions.
+// The decoded values from this spec will then be applied to a FlatCPUOptions.
+func (*FlatCPUOptions) HCL2Spec() map[string]hcldec.Spec {
+	s := map[string]hcldec.Spec{
+		"core_count":       &hcldec.AttrSpec{Name: "core_count", Type: cty.Number, Required: false},
+		"threads_per_core": &hcldec.AttrSpec{Name: "threads_per_core", Type: cty.Number, Required: false},
+	}
+	return s
+}
+
 // FlatLicenseConfigurationRequest is an auto-generated flat version of LicenseConfigurationRequest.
 // Where the contents of a field with a `mapstructure:,squash` tag are bubbled up.
 type FlatLicenseConfigurationRequest struct {

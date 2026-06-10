@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 //go:generate packer-sdc struct-markdown
-//go:generate packer-sdc mapstructure-to-hcl2 -type AmiFilterOptions,SecurityGroupFilterOptions,SubnetFilterOptions,VpcFilterOptions,PolicyDocument,Statement,MetadataOptions,LicenseConfigurationRequest,LicenseSpecification,Placement
+//go:generate packer-sdc mapstructure-to-hcl2 -type AmiFilterOptions,SecurityGroupFilterOptions,SubnetFilterOptions,VpcFilterOptions,PolicyDocument,Statement,MetadataOptions,CPUOptions,LicenseConfigurationRequest,LicenseSpecification,Placement
 
 package common
 
@@ -110,6 +110,16 @@ type MetadataOptions struct {
 	InstanceMetadataTags string `mapstructure:"instance_metadata_tags" required:"false"`
 }
 
+// Configures CPU topology for instance launch.
+// See [CPU options for your EC2 instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-optimize-cpu.html) for details.
+type CPUOptions struct {
+	// The number of CPU cores for the instance.
+	CoreCount int32 `mapstructure:"core_count" required:"false"`
+	// The number of threads per CPU core. To disable multithreading, use 1.
+	// For default behavior, use 2.
+	ThreadsPerCore int32 `mapstructure:"threads_per_core" required:"false"`
+}
+
 // RunConfig contains configuration for running an instance from a source
 // AMI and details on how to access that launched image.
 type RunConfig struct {
@@ -182,6 +192,9 @@ type RunConfig struct {
 	// Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
 	// Default `false`.
 	EbsOptimized bool `mapstructure:"ebs_optimized" required:"false"`
+	// Configure CPU options for the launched instance.
+	// Both `core_count` and `threads_per_core` must be set together.
+	CPUOptions CPUOptions `mapstructure:"cpu_options" required:"false"`
 	// Enable support for Nitro Enclaves on the instance.  Note that the instance type must
 	// be able to [support Nitro Enclaves](https://aws.amazon.com/ec2/nitro/nitro-enclaves/faqs/).
 	// This option is not supported for spot instances.
@@ -761,6 +774,19 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 	if c.Metadata.InstanceMetadataTags != "enabled" && c.Metadata.InstanceMetadataTags != "disabled" {
 		msg := fmt.Errorf("instance_metadata_tags requires either disabled or enabled as its value")
 		errs = append(errs, msg)
+	}
+
+	hasCPUCoreCount := c.CPUOptions.CoreCount != 0
+	hasCPUThreadsPerCore := c.CPUOptions.ThreadsPerCore != 0
+	if hasCPUCoreCount != hasCPUThreadsPerCore {
+		errs = append(errs, fmt.Errorf("cpu_options requires both core_count and threads_per_core to be specified together"))
+	} else if hasCPUCoreCount {
+		if c.CPUOptions.CoreCount < 1 {
+			errs = append(errs, fmt.Errorf("cpu_options.core_count must be greater than or equal to 1"))
+		}
+		if c.CPUOptions.ThreadsPerCore != 1 && c.CPUOptions.ThreadsPerCore != 2 {
+			errs = append(errs, fmt.Errorf("cpu_options.threads_per_core must be either 1 or 2"))
+		}
 	}
 
 	// Copy singular tag maps

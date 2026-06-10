@@ -60,6 +60,7 @@ type StepRunSpotInstance struct {
 	NoEphemeral                       bool
 	IsBurstableInstanceType           bool
 	EnableUnlimitedCredits            bool
+	CPUOptions                        CPUOptions
 
 	instanceId string
 }
@@ -166,6 +167,13 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 
 	if s.EnableUnlimitedCredits {
 		templateData.CreditSpecification = &ec2.CreditSpecificationRequest{CpuCredits: aws.String(CPUCreditsUnlimited)}
+	}
+
+	if s.CPUOptions.CoreCount != 0 && s.CPUOptions.ThreadsPerCore != 0 {
+		templateData.CpuOptions = &ec2.LaunchTemplateCpuOptionsRequest{
+			CoreCount:      aws.Int64(s.CPUOptions.CoreCount),
+			ThreadsPerCore: aws.Int64(s.CPUOptions.ThreadsPerCore),
+		}
 	}
 
 	if s.HttpEndpoint == "enabled" {

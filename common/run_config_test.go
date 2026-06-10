@@ -392,6 +392,35 @@ func TestRunConfigPrepare_EnableNitroEnclaveGood(t *testing.T) {
 	}
 }
 
+func TestRunConfigPrepare_CPUOptionsRequiresBothValues(t *testing.T) {
+	c := testConfig()
+	c.CPUOptions.CoreCount = 2
+	err := c.Prepare(nil)
+	if len(err) != 1 {
+		t.Fatalf("Should error when only one cpu_options value is set")
+	}
+}
+
+func TestRunConfigPrepare_CPUOptionsValid(t *testing.T) {
+	c := testConfig()
+	c.CPUOptions.CoreCount = 2
+	c.CPUOptions.ThreadsPerCore = 1
+	err := c.Prepare(nil)
+	if len(err) != 0 {
+		t.Fatalf("Should not error with valid cpu_options config")
+	}
+}
+
+func TestRunConfigPrepare_CPUOptionsInvalidThreadsPerCore(t *testing.T) {
+	c := testConfig()
+	c.CPUOptions.CoreCount = 2
+	c.CPUOptions.ThreadsPerCore = 3
+	err := c.Prepare(nil)
+	if len(err) != 1 {
+		t.Fatalf("Should error when cpu_options.threads_per_core is not 1 or 2")
+	}
+}
+
 func TestRunConfigPrepare_FailIfBothHostIDAndGroupSpecified(t *testing.T) {
 	c := testConfig()
 	c.Placement.HostId = "host"

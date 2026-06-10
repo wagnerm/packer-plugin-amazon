@@ -56,6 +56,7 @@ type StepRunSourceInstance struct {
 	VolumeTags                        map[string]string
 	NoEphemeral                       bool
 	EnableNitroEnclave                bool
+	CPUOptions                        CPUOptions
 	IsBurstableInstanceType           bool
 
 	instanceId string
@@ -125,6 +126,14 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		Enabled: &s.EnableNitroEnclave,
 	}
 
+	var cpuOptions *ec2types.CpuOptionsRequest
+	if s.CPUOptions.CoreCount != 0 && s.CPUOptions.ThreadsPerCore != 0 {
+		cpuOptions = &ec2types.CpuOptionsRequest{
+			CoreCount:      aws.Int32(s.CPUOptions.CoreCount),
+			ThreadsPerCore: aws.Int32(s.CPUOptions.ThreadsPerCore),
+		}
+	}
+
 	az := state.Get("availability_zone").(string)
 	runOpts := &ec2.RunInstancesInput{
 		ImageId:             &s.SourceAMI,
@@ -137,6 +146,7 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 		Placement:           &ec2types.Placement{AvailabilityZone: &az},
 		EbsOptimized:        &s.EbsOptimized,
 		EnclaveOptions:      &enclaveOptions,
+		CpuOptions:          cpuOptions,
 	}
 
 	if s.NoEphemeral {
