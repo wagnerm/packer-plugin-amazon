@@ -67,10 +67,9 @@
   Optimized](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html).
   Default `false`.
 
-- `cpu_options` (object) - Configure CPU topology for the launched instance.
-  Both `core_count` and `threads_per_core` must be set together.
-  - `core_count` (number) - Number of CPU cores.
-  - `threads_per_core` (number) - Number of threads per CPU core. Valid values are `1` or `2`.
+- `enable_nested_virtualization` (bool) - Enable nested virtualization for the launched instance.
+  Supported only on 8th generation Intel-based instance types (c8i, m8i, r8i, and their flex variants).
+  See [Nested Virtualization](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nested-virtualization.html) for details.
 
 - `enable_nitro_enclave` (bool) - Enable support for Nitro Enclaves on the instance.  Note that the instance type must
   be able to [support Nitro Enclaves](https://aws.amazon.com/ec2/nitro/nitro-enclaves/faqs/).
