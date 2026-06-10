@@ -68,18 +68,15 @@ func getBasicStep() *StepRunSpotInstance {
 func TestCreateTemplateData(t *testing.T) {
 	state := tStateSpot()
 	stepRunSpotInstance := getBasicStep()
-	stepRunSpotInstance.CPUOptions = CPUOptions{
-		CoreCount:      2,
-		ThreadsPerCore: 1,
-	}
+	stepRunSpotInstance.EnableNestedVirtualization = true
 	template := stepRunSpotInstance.CreateTemplateData(aws.String("userdata"), "az", state,
 		&ec2.LaunchTemplateInstanceMarketOptionsRequest{})
 
-	if template.CpuOptions == nil || template.CpuOptions.CoreCount == nil || template.CpuOptions.ThreadsPerCore == nil {
-		t.Fatalf("Template should contain cpu options when cpu_options is configured")
+	if template.CpuOptions == nil || template.CpuOptions.AmdSevSnp == nil {
+		t.Fatalf("Template should contain cpu options when enable_nested_virtualization is configured")
 	}
-	if *template.CpuOptions.CoreCount != 2 || *template.CpuOptions.ThreadsPerCore != 1 {
-		t.Fatalf("Template should contain configured cpu options, received %#v", template.CpuOptions)
+	if *template.CpuOptions.AmdSevSnp != "enabled" {
+		t.Fatalf("Template should have AmdSevSnp set to enabled, received %#v", template.CpuOptions)
 	}
 
 	// expected := []*ec2.LaunchTemplateInstanceNetworkInterfaceSpecificationRequest{

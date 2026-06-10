@@ -56,7 +56,7 @@ type StepRunSourceInstance struct {
 	VolumeTags                        map[string]string
 	NoEphemeral                       bool
 	EnableNitroEnclave                bool
-	CPUOptions                        CPUOptions
+	EnableNestedVirtualization        bool
 	IsBurstableInstanceType           bool
 
 	instanceId string
@@ -127,10 +127,9 @@ func (s *StepRunSourceInstance) Run(ctx context.Context, state multistep.StateBa
 	}
 
 	var cpuOptions *ec2types.CpuOptionsRequest
-	if s.CPUOptions.CoreCount != 0 && s.CPUOptions.ThreadsPerCore != 0 {
+	if s.EnableNestedVirtualization {
 		cpuOptions = &ec2types.CpuOptionsRequest{
-			CoreCount:      aws.Int32(s.CPUOptions.CoreCount),
-			ThreadsPerCore: aws.Int32(s.CPUOptions.ThreadsPerCore),
+			AmdSevSnp: ec2types.AmdSevSnpSpecificationEnabled,
 		}
 	}
 

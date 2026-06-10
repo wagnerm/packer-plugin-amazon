@@ -61,7 +61,7 @@ type StepRunSpotInstance struct {
 	NoEphemeral                       bool
 	IsBurstableInstanceType           bool
 	EnableUnlimitedCredits            bool
-	CPUOptions                        CPUOptions
+	EnableNestedVirtualization        bool
 
 	instanceId string
 }
@@ -172,10 +172,9 @@ func (s *StepRunSpotInstance) CreateTemplateData(userData *string, az string,
 			CPUCreditsUnlimited)}
 	}
 
-	if s.CPUOptions.CoreCount != 0 && s.CPUOptions.ThreadsPerCore != 0 {
+	if s.EnableNestedVirtualization {
 		templateData.CpuOptions = &ec2types.LaunchTemplateCpuOptionsRequest{
-			CoreCount:      aws.Int32(s.CPUOptions.CoreCount),
-			ThreadsPerCore: aws.Int32(s.CPUOptions.ThreadsPerCore),
+			AmdSevSnp: ec2types.AmdSevSnpSpecificationEnabled,
 		}
 	}
 
