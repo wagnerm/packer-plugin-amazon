@@ -183,7 +183,7 @@ type RunConfig struct {
 	// Default `false`.
 	EbsOptimized bool `mapstructure:"ebs_optimized" required:"false"`
 	// Enable nested virtualization for the launched instance.
-	// Supported only on 8th generation Intel-based instance types (c8i, m8i, r8i, and their flex variants).
+	// Supported only on specific 7th and 8th generation Intel-based instance families.
 	// See [Nested Virtualization](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-ec2-nested-virtualization.html) for details.
 	EnableNestedVirtualization bool `mapstructure:"enable_nested_virtualization" required:"false"`
 	// Enable support for Nitro Enclaves on the instance.  Note that the instance type must
@@ -957,6 +957,15 @@ func (c *RunConfig) Prepare(ctx *interpolate.Context) []error {
 		}
 	}
 
+	if c.EnableNestedVirtualization {
+		if !c.SupportsNestedVirtualization() {
+			errs = append(errs, fmt.Errorf(
+				"Error: Nested virtualization requires 7th or 8th generation Intel instance types (C7i, M7i, R7i, I7i, C8i, M8i, R8i, X8i families), got: %s. "+
+					"See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-ec2-nested-virtualization.html",
+				c.InstanceType))
+		}
+	}
+
 	return errs
 }
 
@@ -974,4 +983,37 @@ func (c *RunConfig) SSMAgentEnabled() bool {
 func (c *RunConfig) IsBurstableInstanceType() bool {
 	r := `^t(:?2|3a?|4g)\.`
 	return regexp.MustCompile(r).MatchString(c.InstanceType)
+}
+
+var supportedNestedVirtualizationInstanceFamilies = []string{
+	"c7i",
+	"c7i-flex",
+	"c8i",
+	"c8i-flex",
+	"c8id",
+	"i7i",
+	"m7i",
+	"m7i-flex",
+	"m8i",
+	"m8i-flex",
+	"m8id",
+	"r7i",
+	"r8i",
+	"r8i-flex",
+	"r8id",
+	"x8i",
+}
+
+func (c *RunConfig) SupportsNestedVirtualization() bool {
+	instanceFamily, _, found := strings.Cut(strings.ToLower(c.InstanceType), ".")
+	if !found {
+		return false
+	}
+
+	for _, supportedFamily := range supportedNestedVirtualizationInstanceFamilies {
+		if instanceFamily == supportedFamily {
+			return true
+		}
+	}
+	return false
 }
